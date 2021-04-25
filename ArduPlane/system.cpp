@@ -103,13 +103,10 @@ void Plane::init_ardupilot()
 
     init_rc_in();               // sets up rc channels from radio
 
-    // Init ADC Added. Address: 0 - GND, 1 - VDD, 2 - SDA, 3 - SCL
+    // Init ADC Added. Number of boards: 1 - GND, 2 - GND,VDD, 3 - GND,VDD,SDA, 4 - GND,VDD,SDA,SCL
 
-#if ADC_EXT1 == ENABLED
-    adc1.init(0);
-#endif
-#if ADC_EXT2 == ENABLED
-    adc2.init(1);
+#if ADC_EXT == ENABLED
+    adc.init(2);
 #endif
 
 #if HAL_MOUNT_ENABLED

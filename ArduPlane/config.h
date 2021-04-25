@@ -297,5 +297,4 @@
 
 //////////////////////////////////////////////////////////////////////////////
 // Are external ADC boards connected?
-#define ADC_EXT1 ENABLED
-#define ADC_EXT2 ENABLED
+#define ADC_EXT ENABLED

@@ -288,7 +288,7 @@ struct PACKED log_CMDI {
     uint8_t F;
 };
 
-#if ADC_EXT1 == ENABLED
+#if ADC_EXT == ENABLED
 // Logging of the ADC Data Added
 
 struct PACKED log_ADC {
@@ -298,21 +298,45 @@ struct PACKED log_ADC {
     float a1;
     float a2;
     float a3;
+    float a4;
+    float a5;
+    float a6;
+    float a7;
+    float a8;
+	float a9;
+	float a10;
+	float a11;
+	float a12;
+	float a13;
+	float a14;
+//	float a15;
 //    uint64_t t0;
 //    uint64_t t1;
 //    uint64_t t2;
 //    uint64_t t3;
 };
 
-void AP_ADC_ADS1115::Log_Write_ADC(adc_report_s* rep, uint8_t addr)
+void AP_ADC_ADS1115::Log_Write_ADC(adc_report_s* rep)
 {
     struct log_ADC pkt = {
-        LOG_PACKET_HEADER_INIT(addr),
+        LOG_PACKET_HEADER_INIT(LOG_ADC_MSG),
         time_us   : AP_HAL::micros64(),
         a0        : rep[0].data,
         a1        : rep[1].data,
         a2        : rep[2].data,
         a3        : rep[3].data,
+		a4        : rep[4].data,
+		a5        : rep[5].data,
+		a6        : rep[6].data,
+		a7        : rep[7].data,
+		a8        : rep[8].data,
+		a9        : rep[9].data,
+		a10       : rep[10].data,
+		a11       : rep[11].data,
+		a12       : rep[12].data,
+		a13       : rep[13].data,
+		a14       : rep[14].data,
+//		a15       : rep[15].data,
 //		t0        : rep[0].sampletime,
 //		t1        : rep[1].sampletime,
 //		t2        : rep[2].sampletime,
@@ -507,13 +531,9 @@ const struct LogStructure Plane::log_structure[] = {
 //    { LOG_ADC_MSG2, sizeof(log_ADC),                         // Added
 //      "ADC2", "QffffQQQQ",  "TimeUS,A0,A1,A2,A3,T0,T1,T2,T3", "s----ssss", "---------" },
 //#endif
-#if ADC_EXT1 == ENABLED
-    { LOG_ADC_MSG1, sizeof(log_ADC),                         // Added
-      "ADC1", "Qffff",  "TimeUS,A0,A1,A2,A3", "s----", "-----" },
-#endif
-#if ADC_EXT2 == ENABLED
-    { LOG_ADC_MSG2, sizeof(log_ADC),                         // Added
-      "ADC2", "Qffff",  "TimeUS,A0,A1,A2,A3", "s----", "-----" },
+#if ADC_EXT == ENABLED
+    { LOG_ADC_MSG, sizeof(log_ADC),                         // Added
+      "ADC", "Qfffffffffffffff",  "TimeUS,A00,A01,A02,A03,A04,A05,A06,A07,A08,A09,A10,A11,A12,A13,A14", "s---------------", "----------------" },
 #endif
 };
 
@@ -588,7 +608,7 @@ void Plane::Log_Write_Guided(void) {}
 void Plane::Log_Write_MavCmdI(const mavlink_command_int_t &packet) {}
 void Plane::Log_Write_RC(void) {}
 void Plane::Log_Write_Vehicle_Startup_Messages() {}
-void AP_ADC_ADS1115::Log_Write_ADC(adc_report_s *rep, uint8_t i) {} // Added
+void AP_ADC_ADS1115::Log_Write_ADC(adc_report_s *rep) {} // Added
 
 void Plane::log_init(void) {}
 

@@ -98,6 +98,7 @@ extern const AP_HAL::HAL &hal;
 #define ADS1115_ADDRESS_COUNT           4
 
 const uint8_t AP_ADC_ADS1115::_channels_number  = ADS1115_CHANNELS_COUNT;
+const uint8_t AP_ADC_ADS1115::_addresses_number  = ADS1115_ADDRESS_COUNT;
 
 /* No differential channels used */
 static const uint16_t mux_table[ADS1115_CHANNELS_COUNT] = {
@@ -116,12 +117,12 @@ static const uint8_t addr_table[ADS1115_ADDRESS_COUNT] = {
 
 
 AP_ADC_ADS1115::AP_ADC_ADS1115()
-    : _dev{}
-    , _gain(ADS1115_PGA_6P144)
-    , _channel_to_read(0)
-	, _addr(ADS1115_ADDRESS_ADDR_GND)
+    : //_dev{},
+    _gain(ADS1115_PGA_6P144)
+    //, _channel_to_read(0)
+	//, _board_to_read(0)
 {
-    _samples = new adc_report_s[_channels_number];
+    _samples = new adc_report_s[_channels_number*_addresses_number];
 }
 
 AP_ADC_ADS1115::~AP_ADC_ADS1115()
@@ -129,29 +130,25 @@ AP_ADC_ADS1115::~AP_ADC_ADS1115()
     delete[] _samples;
 }
 
-bool AP_ADC_ADS1115::init(uint8_t addr)
+bool AP_ADC_ADS1115::init(uint8_t boards)
 {
-	_addr = addr;
 
-    _dev = hal.i2c_mgr->get_device(ADS1115_I2C_BUS, addr_table[_addr]);
-    if (!_dev) {
-        return false;
-    }
+	for(int i = 0; i < boards; i++){
+		_dev.push_back(hal.i2c_mgr->get_device(ADS1115_I2C_BUS, addr_table[i], 400000));
+		if (!_dev[i]) {
+			return false;
+		}
+	}
 
     _gain = ADS1115_PGA_6P144;
 
-    // This sets the bus speed between 100kHz (SPEED_LOW) and 400kHz (SPEED_HIGH). Has no effect in the sampling delays.
-    _dev->set_speed(AP_HAL::Device::SPEED_HIGH);
-
-    // 2500us -> 400Hz. This is the maximum.
-    _dev->register_periodic_callback(2500, FUNCTOR_BIND_MEMBER(&AP_ADC_ADS1115::_update, void));
-
-
+    // 10000us -> 100Hz.
+    _dev[0]->register_periodic_callback(10000, FUNCTOR_BIND_MEMBER(&AP_ADC_ADS1115::_update, void));
 
     return true;
 }
 
-bool AP_ADC_ADS1115::_start_conversion(uint8_t channel)
+bool AP_ADC_ADS1115::_start_conversion(uint8_t channel, uint8_t board)
 {
     struct PACKED {
         uint8_t reg;
@@ -163,7 +160,7 @@ bool AP_ADC_ADS1115::_start_conversion(uint8_t channel)
                          ADS1115_MODE_SINGLESHOT | ADS1115_COMP_QUE_DISABLE |
                          ADS1115_RATE_860);
 
-    return _dev->transfer((uint8_t *)&config, sizeof(config), nullptr, 0);
+    return _dev[board]->transfer((uint8_t *)&config, sizeof(config), nullptr, 0);
 }
 
 float AP_ADC_ADS1115::_convert_register_data_to_mv(int16_t word) const
@@ -208,42 +205,34 @@ float AP_ADC_ADS1115::_convert_register_data_to_mv(int16_t word) const
 
 void AP_ADC_ADS1115::_update()
 {
+
 	be16_t val;
-    uint8_t config[2];
 
-    if (!_dev->read_registers(ADS1115_RA_CONFIG, config, sizeof(config))) {
-        error("_dev->read_registers failed in ADS1115");
-    	AP::logger().Write_MessageF("_dev->read_registers "
-    			"(CONFIG) failed in ADS1115");
-        return;
-    }
+	for(int channel = 0; channel < _channels_number; channel++){
 
-    /* check rdy bit */
-    if ((config[1] & 0x80) != 0x80 ) {
-    	AP::logger().Write_MessageF("ADS1115:Wait for conversion");
-        return;
-    }
+		for(int board = 0; board < _dev.size(); board++){
 
-//    // delay to not scramble results. Minimum tested: 300 (Against ardupilot official driver recommendations)
-//    hal.scheduler->delay_microseconds(300);
+			if (!_dev[board]->read_registers(ADS1115_RA_CONVERSION, (uint8_t *)&val,  sizeof(val))) {
+				AP::logger().Write_MessageF("_dev->read_registers (CONV) failed in ADS1115");
+				return;
+			}
 
-    if (!_dev->read_registers(ADS1115_RA_CONVERSION, (uint8_t *)&val,  sizeof(val))) {
-    	AP::logger().Write_MessageF("_dev->read_registers (CONV) failed in ADS1115");
-        return;
-    }
+			float sample = _convert_register_data_to_mv(be16toh(val));
 
-    float sample = _convert_register_data_to_mv(be16toh(val));
+			_samples[board*_channels_number+channel].data = sample*0.001f; // mVolts to Volts
 
-    _samples[_channel_to_read].data = sample*0.001f; // mVolts to Volts
-    //_samples[_channel_to_read].sampletime = AP_HAL::micros64(); // sample time in us for debugging
+			_start_conversion((channel+1)%_channels_number, board);
 
-    /* select next channel */
-    _channel_to_read = (_channel_to_read + 1) % _channels_number;
-    _start_conversion(_channel_to_read);
+		}
 
-    if (_channel_to_read == 0) {
+		// delay to not scramble results. This is against ardupilot official driver recommendations, but needed with one board to not scramble results.
+		if(_dev.size()==1){
+			hal.scheduler->delay_microseconds(1000);
+		}
+	}
 
-    	Log_Write_ADC(_samples, 17+_addr);
+	Log_Write_ADC(_samples);
 
-    }
+
+
 }

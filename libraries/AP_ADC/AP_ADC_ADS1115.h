@@ -15,7 +15,7 @@ public:
     AP_ADC_ADS1115();
     ~AP_ADC_ADS1115();
 
-    bool init(uint8_t addr);
+    bool init(uint8_t boards); // init input: number of boards connected
 
     uint8_t get_channels_number() const
     {
@@ -24,17 +24,19 @@ public:
 
 private:
     static const uint8_t _channels_number;
+    static const uint8_t _addresses_number;
 
-    AP_HAL::OwnPtr<AP_HAL::I2CDevice> _dev;
+    //AP_HAL::OwnPtr<AP_HAL::I2CDevice> _dev;
+    std::vector<AP_HAL::OwnPtr<AP_HAL::I2CDevice>> _dev;
 
     uint16_t            _gain;
-    uint8_t           _addr;
-    int                 _channel_to_read;
+    //int                 _channel_to_read;
+    //int                 _board_to_read;
     adc_report_s        *_samples;
 
     void _update();
-    bool _start_conversion(uint8_t channel);
+    bool _start_conversion(uint8_t channel, uint8_t board);
 
     float _convert_register_data_to_mv(int16_t word) const;
-    void Log_Write_ADC(adc_report_s* rep, uint8_t i);
+    void Log_Write_ADC(adc_report_s* rep);
 };
