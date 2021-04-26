@@ -117,10 +117,8 @@ static const uint8_t addr_table[ADS1115_ADDRESS_COUNT] = {
 
 
 AP_ADC_ADS1115::AP_ADC_ADS1115()
-    : //_dev{},
+    :
     _gain(ADS1115_PGA_6P144)
-    //, _channel_to_read(0)
-	//, _board_to_read(0)
 {
     _samples = new adc_report_s[_channels_number*_addresses_number];
 }
@@ -232,7 +230,5 @@ void AP_ADC_ADS1115::_update()
 	}
 
 	Log_Write_ADC(_samples);
-
-
 
 }

@@ -26,12 +26,9 @@ private:
     static const uint8_t _channels_number;
     static const uint8_t _addresses_number;
 
-    //AP_HAL::OwnPtr<AP_HAL::I2CDevice> _dev;
     std::vector<AP_HAL::OwnPtr<AP_HAL::I2CDevice>> _dev;
 
     uint16_t            _gain;
-    //int                 _channel_to_read;
-    //int                 _board_to_read;
     adc_report_s        *_samples;
 
     void _update();

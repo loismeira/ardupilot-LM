@@ -523,14 +523,6 @@ const struct LogStructure Plane::log_structure[] = {
       "CMDA", "QHBBBBffffiifB",    "TimeUS,CId,TSys,TCmp,cur,cont,Prm1,Prm2,Prm3,Prm4,Lat,Lng,Alt,F", "s---------DUm-", "F---------GGB-" }, 
     { LOG_CMDH_MSG, sizeof(log_CMDI),     
       "CMDH", "QHBBBBffffiifB",    "TimeUS,CId,TSys,TCmp,cur,cont,Prm1,Prm2,Prm3,Prm4,Lat,Lng,Alt,F", "s---------DUm-", "F---------GGB-" }, 
-//#if ADC_EXT1 == ENABLED
-//    { LOG_ADC_MSG1, sizeof(log_ADC),                         // Added
-//      "ADC1", "QffffQQQQ",  "TimeUS,A0,A1,A2,A3,T0,T1,T2,T3", "s----ssss", "---------" },
-//#endif
-//#if ADC_EXT2 == ENABLED
-//    { LOG_ADC_MSG2, sizeof(log_ADC),                         // Added
-//      "ADC2", "QffffQQQQ",  "TimeUS,A0,A1,A2,A3,T0,T1,T2,T3", "s----ssss", "---------" },
-//#endif
 #if ADC_EXT == ENABLED
     { LOG_ADC_MSG, sizeof(log_ADC),                         // Added
       "ADC", "Qfffffffffffffff",  "TimeUS,A00,A01,A02,A03,A04,A05,A06,A07,A08,A09,A10,A11,A12,A13,A14", "s---------------", "----------------" },
