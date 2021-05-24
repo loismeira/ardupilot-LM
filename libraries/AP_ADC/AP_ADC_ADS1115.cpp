@@ -210,6 +210,10 @@ void AP_ADC_ADS1115::_update()
 
 		for(int board = 0; board < _dev.size(); board++){
 
+			// Small delay to battle the scrambling I found the day I added the NanoRPM measurements (there should be no correlation) Lowest working: 50us
+
+			hal.scheduler->delay_microseconds(50);
+
 			if (!_dev[board]->read_registers(ADS1115_RA_CONVERSION, (uint8_t *)&val,  sizeof(val))) {
 				AP::logger().Write_MessageF("_dev->read_registers (CONV) failed in ADS1115");
 				return;

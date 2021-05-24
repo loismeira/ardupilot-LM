@@ -347,6 +347,28 @@ void AP_ADC_ADS1115::Log_Write_ADC(adc_report_s* rep)
 }
 #endif
 
+#if NANORPM == ENABLED
+// Logging of the Nano Every RPM measurements Added
+
+struct PACKED log_NanoRPM {
+    LOG_PACKET_HEADER;
+    uint64_t time_us;
+    float rpm;
+};
+
+void AP_NanoRPM::Log_Write_NanoRPM(NanoRPM_report_s* rep)
+{
+    struct log_NanoRPM pkt = {
+        LOG_PACKET_HEADER_INIT(LOG_NANORPM_MSG),
+        time_us   : AP_HAL::micros64(),
+        rpm        : rep[0].data,
+
+    };
+
+    AP::logger().WriteBlock(&pkt, sizeof(pkt));
+}
+#endif
+
 
 // type and unit information can be found in
 // libraries/AP_Logger/Logstructure.h; search for "log_Units" for
@@ -527,6 +549,10 @@ const struct LogStructure Plane::log_structure[] = {
     { LOG_ADC_MSG, sizeof(log_ADC),                         // Added
       "ADC", "Qfffffffffffffff",  "TimeUS,A00,A01,A02,A03,A04,A05,A06,A07,A08,A09,A10,A11,A12,A13,A14", "s---------------", "----------------" },
 #endif
+#if NANORPM == ENABLED
+    { LOG_NANORPM_MSG, sizeof(log_NanoRPM),                         // Added
+      "NRPM", "Qf",  "TimeUS,RPM", "s-", "--" },
+#endif
 };
 
 
@@ -601,6 +627,7 @@ void Plane::Log_Write_MavCmdI(const mavlink_command_int_t &packet) {}
 void Plane::Log_Write_RC(void) {}
 void Plane::Log_Write_Vehicle_Startup_Messages() {}
 void AP_ADC_ADS1115::Log_Write_ADC(adc_report_s *rep) {} // Added
+void AP_NanoRPM::Log_Write_NanoRPM(NanoRPM_report_s *rep) {} // Added
 
 void Plane::log_init(void) {}
 

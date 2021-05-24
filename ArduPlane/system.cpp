@@ -108,6 +108,10 @@ void Plane::init_ardupilot()
 #if ADC_EXT == ENABLED
     adc.init(2);
 #endif
+    // Init NanoRPM Added.
+#if NANORPM == ENABLED
+    nano_rpm.init();
+#endif
 
 #if HAL_MOUNT_ENABLED
     // initialise camera mount

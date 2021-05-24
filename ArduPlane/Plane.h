@@ -35,6 +35,7 @@
 #include <StorageManager/StorageManager.h>
 #include <AP_Math/AP_Math.h>        // ArduPilot Mega Vector/Matrix math Library
 #include <AP_ADC/AP_ADC_ADS1115.h>  // ADS1115 ADC libraries
+#include <AP_NanoRPM/AP_NanoRPM.h>  // Nano Every RPM measurement libraries
 #include <AP_InertialSensor/AP_InertialSensor.h> // Inertial Sensor Library
 #include <AP_AccelCal/AP_AccelCal.h>                // interface and maths for accelerometer calibration
 #include <AP_AHRS/AP_AHRS.h>         // ArduPilot Mega DCM Library
@@ -872,6 +873,7 @@ private:
     void Log_Write_AOA_SSA();
     void Log_Write_AETR();
     void Log_Write_ADC (adc_report_s* report);      // Added
+    void Log_Write_NanoRPM (NanoRPM_report_s* report);      // Added
     void Log_Write_MavCmdI(const mavlink_command_int_t &packet);
     void log_init();
 
@@ -1095,6 +1097,8 @@ private:
 
     // ADC
     AP_ADC_ADS1115 adc;
+    // Nano Every RPM
+    AP_NanoRPM nano_rpm;
     // adc_report_s *report;
 
     //void adc_read ();
