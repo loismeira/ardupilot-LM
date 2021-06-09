@@ -7,7 +7,7 @@
 #define NANORPM_I2C_ADDR    0x29 // Default address
 #define NANORPM_I2C_BUS     1
 
-// Scaling factor for number of magnets / number of poles for a Brushless RPM sensor
+// Scaling factor for number of magnets / pairs of poles for a Brushless RPM sensor
 
 #define SCALING_FACTOR     2
 
